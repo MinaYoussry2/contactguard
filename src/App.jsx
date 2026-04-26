@@ -942,3 +942,136 @@ export default function App() {
                           <div className="cl-head" onClick={() => setOpenClause(openClause === i ? null : i)}>
                             <span className={'cl-badge b-' + cl.status}>
                               {cl.status === 'risk' ? '⚠ RISK' : cl.status === 'warn' ? '⚡ REVIEW' : '✓ OK'}
+                            </span>
+                            <span className="cl-title">{cl.title}</span>
+                            <span className={'cl-arrow' + (openClause === i ? ' open' : '')}>▼</span>
+                          </div>
+                          {openClause === i && (
+                            <div className="cl-body">
+                              <div className="cl-field"><div className="cl-fl">📝 Plain English</div><div className="cl-fv">{cl.plainEnglish}</div></div>
+                              <div className="cl-field"><div className="cl-fl">⚖️ Legal Analysis</div><div className="cl-fv">{cl.legalAnalysis}</div></div>
+                              <div className="cl-field"><div className="cl-fl">🛡 Your Rights</div><div className="cl-fv">{cl.yourRights}</div></div>
+                              {cl.negotiationTip && (
+                                <div className="cl-field" style={{ background: 'rgba(139,105,20,0.06)', border: '1px solid rgba(139,105,20,0.2)', borderRadius: 9, padding: '10px 13px' }}>
+                                  <div className="cl-fl" style={{ color: 'var(--accent)' }}>💡 Negotiation Tip</div>
+                                  <div className="cl-fv">{cl.negotiationTip}</div>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="rsec">
+                  <div className="rsec-head">
+                    <div className="rsec-ico" style={{ background: 'rgba(155,28,28,0.1)', border: '1px solid rgba(155,28,28,0.25)' }}>🔴</div>
+                    <div>
+                      <div className="rsec-title">Contract with Risk Highlights</div>
+                      <div className="rsec-sub">Risky terms highlighted in the original text</div>
+                    </div>
+                  </div>
+                  <div className="cview" dangerouslySetInnerHTML={{ __html: highlight(contractText.slice(0, 3000), result.clauses) }} />
+                </div>
+
+                {result.legalComparison?.length > 0 && (
+                  <div className="rsec">
+                    <div className="rsec-head">
+                      <div className="rsec-ico" style={{ background: 'rgba(45,106,79,0.1)', border: '1px solid rgba(45,106,79,0.25)' }}>🌍</div>
+                      <div>
+                        <div className="rsec-title">Legal Standards Check</div>
+                        <div className="rsec-sub">How your contract compares to legal norms in your jurisdiction</div>
+                      </div>
+                    </div>
+                    <div className="legal-list">
+                      {result.legalComparison.map((l, i) => (
+                        <div key={i} className={'legal-item ' + l.status}>
+                          <span className={'legal-badge ' + l.status}>{l.status === 'warn' ? '⚠ UNUSUAL' : '✓ STANDARD'}</span>
+                          <span>{l.text}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="rsec">
+                  <div className="rsec-head">
+                    <div className="rsec-ico" style={{ background: 'rgba(139,105,20,0.1)', border: '1px solid rgba(139,105,20,0.25)' }}>✍️</div>
+                    <div>
+                      <div className="rsec-title">Negotiation Suggestions</div>
+                      <div className="rsec-sub">Specific advice before you sign</div>
+                    </div>
+                  </div>
+                  <ul className="sug-list">
+                    {result.suggestions?.map((s, i) => (
+                      <li key={i} className="sug-item"><span className="snum">{i + 1}</span>{s}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                {result.overallAdvice && (
+                  <div className="rsec" style={{ background: 'rgba(139,105,20,0.05)', borderColor: 'rgba(139,105,20,0.2)' }}>
+                    <div className="rsec-head">
+                      <div className="rsec-ico" style={{ background: 'rgba(139,105,20,0.12)', border: '1px solid rgba(139,105,20,0.3)' }}>🎯</div>
+                      <div className="rsec-title">Our Recommendation</div>
+                    </div>
+                    <p className="sum-text">{result.overallAdvice}</p>
+                  </div>
+                )}
+
+                <div className="rsec">
+                  <div className="rsec-head">
+                    <div className="rsec-ico" style={{ background: 'rgba(139,92,246,0.1)', border: '1px solid rgba(139,92,246,0.25)' }}>💬</div>
+                    <div>
+                      <div className="rsec-title">Legal AI Advisor</div>
+                      <div className="rsec-sub">Ask anything about your contract</div>
+                    </div>
+                  </div>
+                  <div className="quick-qs">
+                    {QUICK_QS.map((q, i) => (
+                      <button key={i} className="qq" onClick={() => sendChat(q)}>{q}</button>
+                    ))}
+                  </div>
+                  <div className="chat-msgs">
+                    {chatMsgs.map((m, i) => (
+                      <div key={i} className={'chat-msg ' + m.role}>
+                        <div className={'chat-av ' + (m.role === 'ai' ? 'ai' : 'usr')}>{m.role === 'ai' ? '⚖️' : '👤'}</div>
+                        <div className="bubble">{m.text}</div>
+                      </div>
+                    ))}
+                    {chatLoading && (
+                      <div className="chat-msg ai">
+                        <div className="chat-av ai">⚖️</div>
+                        <div className="bubble" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span className="spin" />Analyzing...
+                        </div>
+                      </div>
+                    )}
+                    <div ref={chatEnd} />
+                  </div>
+                  <div className="chat-row">
+                    <input className="chat-in"
+                      placeholder="Ask about your rights, any clause, or what to do next..."
+                      value={chatInput}
+                      onChange={e => setChatInput(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && sendChat()} />
+                    <button className="chat-send" disabled={!chatInput.trim() || chatLoading} onClick={() => sendChat()}>
+                      {chatLoading ? <span className="spin" /> : 'Ask →'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        <footer>
+          <span>© 2026 ContractGuard</span>
+          <span>For informational purposes only · Not legal advice</span>
+        </footer>
+      </div>
+    </>
+  )
+}
