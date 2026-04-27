@@ -3,7 +3,7 @@ export default async function handler(req, res) {
   const { orderID, userId } = req.body
   if (!orderID) return res.status(400).json({ error: 'No order ID' })
   try {
-    const authRes = await fetch('https://api-m.paypal.com/v1/oauth2/token', {
+    const authRes = await fetch('https://api-m.sandbox.paypal.com/v1/oauth2/token', {
       method: 'POST',
       headers: {
         'Authorization': 'Basic ' + Buffer.from(`${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_SECRET}`).toString('base64'),
@@ -14,7 +14,7 @@ export default async function handler(req, res) {
     const authData = await authRes.json()
     const accessToken = authData.access_token
 
-    const orderRes = await fetch(`https://api-m.paypal.com/v2/checkout/orders/${orderID}`, {
+    const orderRes = await fetch(`https://api-m.sandbox.paypal.com/v2/checkout/orders/${orderID}`, {
       headers: { 'Authorization': `Bearer ${accessToken}` }
     })
     const order = await orderRes.json()
