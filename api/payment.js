@@ -19,7 +19,7 @@ export default async function handler(req, res) {
     })
     const order = await orderRes.json()
 
-    if (order.status === 'COMPLETED') {
+    if (order.status === 'COMPLETED' || order.status === 'APPROVED') {
       const { createClient } = await import('@supabase/supabase-js')
       const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SECRET)
       await supabase.from('payments').insert({
