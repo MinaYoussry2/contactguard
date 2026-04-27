@@ -52,6 +52,8 @@ ${contractText.slice(0, 12000)}`
       })
     })
     const data = await response.json()
+    console.log('Anthropic response status:', response.status)
+    console.log('Anthropic response data:', JSON.stringify(data))
     const raw = data.content?.map(b => b.text || '').join('') || ''
     const clean = raw.replace(/```json|```/g, '').trim()
     const result = JSON.parse(clean)
