@@ -3,7 +3,7 @@ export default async function handler(req, res) {
   const { question, result, contractText } = req.body
   if (!question) return res.status(400).json({ error: 'No question provided' })
   try {
-    const prompt = `You are a senior contract lawyer specializing in ${result?.jurisdiction || 'UK and US'} law.
+    const prompt = `You are a senior contract lawyer with international experience in UK, US, EU, Canada, and Australia law, specializing in ${result?.jurisdiction || 'applicable'} law for this contract.
 
 Contract findings:
 JURISDICTION: ${result?.jurisdiction} - ${result?.jurisdictionReason}
