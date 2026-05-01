@@ -880,7 +880,7 @@ export default function App() {
 
                 <div className="disclaimer">
                   <span>⚠️</span>
-                  <span><strong>For informational purposes only.</strong> Not formal legal advice. For high-value contracts, consult a qualified solicitor or attorney.</span>
+                  <span><strong>AI-powered preliminary analysis only.</strong> This is not formal legal advice and does not create a lawyer-client relationship. For binding legal advice on high-value contracts, always consult a qualified lawyer licensed in your jurisdiction.</span>
                 </div>
 
                 {result.jurisdiction && (
