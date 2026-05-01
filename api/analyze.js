@@ -2,6 +2,13 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
   const { contractText, userId } = req.body
   if (!contractText) return res.status(400).json({ error: 'No contract text provided' })
+  
+  console.log('=== DEBUG INFO ===')
+  console.log('API Key exists:', !!process.env.ANTHROPIC_API_KEY)
+  console.log('API Key length:', process.env.ANTHROPIC_API_KEY?.length || 0)
+  console.log('API Key starts with:', process.env.ANTHROPIC_API_KEY?.substring(0, 15) || 'EMPTY')
+  console.log('==================')
+  
   try {
     const prompt = `You are a highly experienced contract lawyer with 20+ years in UK and US law.
 
