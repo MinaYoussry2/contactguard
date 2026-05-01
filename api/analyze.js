@@ -76,3 +76,4 @@ ${contractText.slice(0, 12000)}`
     res.status(500).json({ error: 'Analysis failed. Please try again.' })
   }
 }
+
