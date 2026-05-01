@@ -43,7 +43,7 @@ STEP 3 - FULL ANALYSIS. Respond ONLY with valid JSON, no markdown:
 }
 
 CONTRACT:
-${contractText.slice(0, 12000)}`
+${contractText.slice(0, 10000)}`
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -54,7 +54,7 @@ ${contractText.slice(0, 12000)}`
       },
       body: JSON.stringify({
         model: 'claude-opus-4-5',
-        max_tokens: 4000,
+        max_tokens: 8000,
         messages: [{ role: 'user', content: prompt }]
       })
     })
@@ -76,4 +76,3 @@ ${contractText.slice(0, 12000)}`
     res.status(500).json({ error: 'Analysis failed. Please try again.' })
   }
 }
-
