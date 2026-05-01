@@ -327,11 +327,11 @@ const QUICK_QS = [
 
 const FAQ_DATA = [
   { q: 'Is this real legal advice?', a: 'MyLegalGuard provides detailed legal information based on UK and US law. It is not formal legal advice. For high-stakes contracts, consult a qualified solicitor or attorney.' },
-  { q: 'How does the AI detect my jurisdiction?', a: 'The AI automatically detects the governing jurisdiction from your contract — looking for governing law clauses, currency symbols, legal terminology, and company formats. It then applies the exact laws of that jurisdiction.' },
+  { q: 'How does the AI detect my jurisdiction?', a: 'The AI automatically detects the governing jurisdiction from your contract — looking for governing law clauses, currency symbols (£, $, €, CAD, AUD), legal terminology, and company formats (Ltd, Inc, GmbH, SARL, Pty Ltd, etc). It then applies the exact laws of that jurisdiction.' },
   { q: 'What types of contracts can I analyze?', a: 'Any written contract — employment, tenancy, freelance, service agreements, NDAs, partnership agreements, and more.' },
   { q: 'Is my contract data kept private?', a: 'Your contract is processed securely and is not stored permanently or shared with third parties. Each analysis is private to you.' },
   { q: 'What do I get for $7.99?', a: 'Full clause-by-clause breakdown, risk score, UK/US legal comparison, negotiation tips, risk highlights, and unlimited Legal AI Advisor chat for your contract.' },
-  { q: 'Can I use this for contracts from other countries?', a: 'The AI is optimized for UK and US contracts but can analyze any English-language contract and will identify the governing jurisdiction.' },
+  { q: 'Can I use this for contracts from other countries?', a: 'The AI is optimized for UK, US, EU (Germany, France, Italy, Spain, Netherlands), Canada, and Australia. It can analyze any English-language contract and will identify the governing jurisdiction automatically.' },
 ]
 
 const clauseStyle = {
@@ -725,14 +725,14 @@ export default function App() {
               <div className="hero-inner">
                 <div className="eyebrow">⚖️ Deep Legal Intelligence</div>
                 <h1>Understand your contract like<br /><em>a senior lawyer</em></h1>
-                <p>Clause-by-clause legal breakdown, your rights under UK and US law, risk assessment, and an AI legal advisor.</p>
+                <p>Clause-by-clause legal breakdown, your rights under UK, US, EU, Canadian, and Australian law, risk assessment, and an AI legal advisor.</p>
                 <div className="hero-btns">
                   <button className="btn-main" onClick={() => openModal('register')}>Analyze My Contract →</button>
                   <button className="btn-out" onClick={() => openModal('login')}>Sign In</button>
                 </div>
                 <p className="price-hint">Pay per analysis · <strong>$7.99 per contract</strong> · No subscription</p>
                 <div className="hero-badges">
-                  {[{ e: '⚡', t: 'Instant Analysis' }, { e: '🔒', t: '100% Secure' }, { e: '⚖️', t: 'UK & US Law' }, { e: '💬', t: 'AI Legal Chat' }].map((b, i) => (
+                  {[{ e: '⚡', t: 'Instant Analysis' }, { e: '🔒', t: '100% Secure' }, { e: '⚖️', t: 'Global Law' }, { e: '💬', t: 'AI Legal Chat' }].map((b, i) => (
                     <div key={i} className="hbadge">{b.e} {b.t}</div>
                   ))}
                 </div>
@@ -742,7 +742,7 @@ export default function App() {
             <div className="fstrip">
               {[
                 { e: '📋', t: 'Clause-by-Clause', s: 'Every clause explained simply' },
-                { e: '🌍', t: 'UK & US Law', s: 'Auto-detects your jurisdiction' },
+                { e: '🌍', t: 'Global Coverage', s: 'UK, US, EU, Canada, Australia' },
                 { e: '🔴', t: 'Risk Highlights', s: 'Risky terms highlighted in red' },
                 { e: '💬', t: 'Legal AI Chat', s: 'Ask anything, get clear answers' },
                 { e: '✍️', t: 'Negotiation Tips', s: 'Exact language to negotiate' },
@@ -886,8 +886,20 @@ export default function App() {
                 {result.jurisdiction && (
                   <div className="juris-banner">
                     <span style={{ fontSize: '1.3rem' }}>
-                      {result.jurisdiction.includes('UK') && !result.jurisdiction.includes('US') ? '🇬🇧'
-                        : result.jurisdiction.includes('US') && !result.jurisdiction.includes('UK') ? '🇺🇸' : '🌍'}
+                      {(() => {
+                        const j = result.jurisdiction.toLowerCase()
+                        if (j.includes('uk') || j.includes('united kingdom') || j.includes('england') || j.includes('scotland') || j.includes('wales')) return '🇬🇧'
+                        if (j.includes('us') || j.includes('united states') || j.includes('america')) return '🇺🇸'
+                        if (j.includes('canada')) return '🇨🇦'
+                        if (j.includes('australia')) return '🇦🇺'
+                        if (j.includes('germany') || j.includes('deutschland')) return '🇩🇪'
+                        if (j.includes('france')) return '🇫🇷'
+                        if (j.includes('italy')) return '🇮🇹'
+                        if (j.includes('spain')) return '🇪🇸'
+                        if (j.includes('netherlands') || j.includes('holland')) return '🇳🇱'
+                        if (j.includes('eu') || j.includes('european')) return '🇪🇺'
+                        return '🌍'
+                      })()}
                     </span>
                     <div>
                       <div className="juris-lbl">JURISDICTION DETECTED: {result.jurisdiction}</div>
