@@ -253,6 +253,16 @@ const css = `
 
   footer { margin-top:auto; border-top:1px solid var(--border); padding:20px 48px; display:flex; align-items:center; justify-content:space-between; font-size:0.75rem; color:var(--muted); background:var(--surface); }
 
+  .paywall { background:linear-gradient(135deg,rgba(139,105,20,0.08),rgba(196,154,26,0.04)); border:2px solid rgba(139,105,20,0.25); border-radius:var(--r); padding:32px 26px; margin-bottom:13px; box-shadow:var(--shadowlg); animation:fadeUp .5s ease; }
+  .paywall-blur { display:flex; flex-direction:column; align-items:center; text-align:center; }
+  .paywall-icon { font-size:2.5rem; margin-bottom:12px; animation:float 3s ease-in-out infinite; }
+  .paywall-title { font-family:var(--display); font-size:1.55rem; font-weight:800; margin-bottom:7px; color:var(--text); }
+  .paywall-sub { color:var(--muted); font-size:0.88rem; max-width:440px; margin-bottom:22px; line-height:1.65; }
+  .paywall-features { display:flex; flex-direction:column; gap:9px; margin-bottom:20px; width:100%; max-width:420px; }
+  .pwf { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:10px 14px; font-size:0.85rem; color:var(--text); text-align:left; }
+  .paywall-price { font-family:var(--display); font-size:2rem; font-weight:800; color:var(--accent); margin-bottom:5px; }
+  .paywall-price span { font-family:var(--font); font-size:0.78rem; color:var(--muted); font-weight:400; }
+
   @media(max-width:700px){
     nav{padding:13px 16px;}
     .hero{padding:65px 16px 55px;}
@@ -316,7 +326,7 @@ const QUICK_QS = [
 ]
 
 const FAQ_DATA = [
-  { q: 'Is this real legal advice?', a: 'ContractGuard provides detailed legal information based on UK and US law. It is not formal legal advice. For high-stakes contracts, consult a qualified solicitor or attorney.' },
+  { q: 'Is this real legal advice?', a: 'MyLegalGuard provides detailed legal information based on UK and US law. It is not formal legal advice. For high-stakes contracts, consult a qualified solicitor or attorney.' },
   { q: 'How does the AI detect my jurisdiction?', a: 'The AI automatically detects the governing jurisdiction from your contract — looking for governing law clauses, currency symbols, legal terminology, and company formats. It then applies the exact laws of that jurisdiction.' },
   { q: 'What types of contracts can I analyze?', a: 'Any written contract — employment, tenancy, freelance, service agreements, NDAs, partnership agreements, and more.' },
   { q: 'Is my contract data kept private?', a: 'Your contract is processed securely and is not stored permanently or shared with third parties. Each analysis is private to you.' },
@@ -453,7 +463,7 @@ export default function App() {
     script.onload = () => {
       window.paypal.Buttons({
         createOrder: (data, actions) => actions.order.create({
-          purchase_units: [{ amount: { value: '7.99', currency_code: 'USD' }, description: 'ContractGuard Analysis' }]
+          purchase_units: [{ amount: { value: '7.99', currency_code: 'USD' }, description: 'MyLegalGuard Analysis' }]
         }),
         onApprove: async data => {
           const res = await fetch('/api/payment', {
@@ -497,7 +507,6 @@ export default function App() {
         if (!res.ok) throw new Error(parsed.error)
         setResult(parsed); setPhase('done')
         setChatMsgs([{ role: 'ai', text: 'Analysis complete. ' + parsed.verdict + ' Ask me anything about your contract.' }])
-        setPaid(false); setCredits(c => Math.max(0, c - 1))
       } catch (e) {
         setPhase('error'); setErr(e.message || 'Analysis failed. Please try again.')
       }
@@ -539,6 +548,7 @@ export default function App() {
   }
 
   const canProceed = (tab === 'upload' && file) || (tab === 'paste' && rawText.trim().length > 30)
+  const isPreview = phase === 'done' && result && !paid
   const userName = user?.user_metadata?.full_name || user?.email || ''
   const isSettingsMsg = settingsMsg.startsWith('success:') || settingsMsg.startsWith('error:')
   const settingsMsgType = settingsMsg.startsWith('success:') ? 'success' : 'error'
@@ -557,7 +567,7 @@ export default function App() {
         <nav>
           <div className="logo">
             <div className="logo-mark">🛡</div>
-            Contract<span>Guard</span>
+            MyLegal<span>Guard</span>
           </div>
           <div className="nav-r">
             {user ? (
@@ -665,7 +675,7 @@ export default function App() {
               ) : (
                 <>
                   <h2>{modal === 'login' ? 'Welcome back' : 'Create account'}</h2>
-                  <p className="modal-sub">{modal === 'login' ? 'Sign in to ContractGuard' : 'Deep legal analysis for $7.99 per contract'}</p>
+                  <p className="modal-sub">{modal === 'login' ? 'Sign in to MyLegalGuard' : 'Deep legal analysis for $7.99 per contract'}</p>
 
                   {modal === 'register' && (
                     <div className="field">
@@ -800,27 +810,10 @@ export default function App() {
 
                     <div className="pay-row">
                       <div>
-                        <div className="pay-lbl">{paid ? '✅ Payment confirmed — ready to analyze!' : 'One-time payment'}</div>
-                        <div className="pay-price">$7.99 <span>/ full legal analysis</span></div>
+                        <div className="pay-lbl">🎁 Free preview — see if your contract is risky</div>
+                        <div className="pay-price" style={{fontSize:'1.2rem'}}>Try it free — no payment needed</div>
                       </div>
-                      {!paid ? (
-                        <div>
-                          <div id="pp-container" />
-                          {!paying && (
-                            <button className="pp-btn" disabled={!canProceed} onClick={handlePayPal}>
-                              🅿 Pay with PayPal
-                            </button>
-                          )}
-                          {paying && (
-                            <div style={{ color: 'var(--muted)', fontSize: '0.84rem', display: 'flex', alignItems: 'center', gap: 8 }}>
-                              <span className="spin spin-a" />Loading PayPal...
-                            </div>
-                          )}
-                          <div className="pay-note">🔒 Secure {!canProceed && <span style={{ color: 'var(--red)' }}>· Add contract first</span>}</div>
-                        </div>
-                      ) : (
-                        <button className="paid-btn" onClick={analyze}>⚖️ Start Legal Analysis →</button>
-                      )}
+                      <button className="paid-btn" disabled={!canProceed} onClick={analyze}>⚖️ Analyze Contract Free →</button>
                     </div>
                   </div>
                 </div>
@@ -926,7 +919,37 @@ export default function App() {
                   <p className="sum-text">{result.summary}</p>
                 </div>
 
-                {result.clauses?.length > 0 && (
+                {!paid && (
+                  <div className="paywall">
+                    <div className="paywall-blur">
+                      <div className="paywall-icon">🔒</div>
+                      <div className="paywall-title">Unlock Full Legal Report</div>
+                      <div className="paywall-sub">You've seen the preview. Get the complete analysis to understand every clause and protect yourself.</div>
+                      <div className="paywall-features">
+                        <div className="pwf">📋 Clause-by-clause breakdown with legal analysis</div>
+                        <div className="pwf">🔴 Risky terms highlighted in your contract</div>
+                        <div className="pwf">⚖️ Your rights under {result.jurisdiction} law</div>
+                        <div className="pwf">✍️ Negotiation suggestions for each issue</div>
+                        <div className="pwf">💬 AI Legal Advisor — ask anything</div>
+                      </div>
+                      <div className="paywall-price">$7.99 <span>· One-time payment</span></div>
+                      <div id="pp-container" style={{marginTop:14}} />
+                      {!paying && (
+                        <button className="pp-btn" style={{margin:'0 auto'}} onClick={handlePayPal}>
+                          🅿 Pay with PayPal — Unlock Full Report
+                        </button>
+                      )}
+                      {paying && (
+                        <div style={{color:'var(--muted)',fontSize:'0.84rem',display:'flex',alignItems:'center',gap:8,justifyContent:'center',marginTop:14}}>
+                          <span className="spin spin-a" />Loading PayPal...
+                        </div>
+                      )}
+                      <div className="pay-note" style={{textAlign:'center',marginTop:10}}>🔒 Secure payment · Instant access</div>
+                    </div>
+                  </div>
+                )}
+
+                {paid && result.clauses?.length > 0 && (
                   <div className="rsec">
                     <div className="rsec-head">
                       <div className="rsec-ico" style={{ background: 'rgba(180,83,9,0.1)', border: '1px solid rgba(180,83,9,0.25)' }}>📋</div>
@@ -965,7 +988,7 @@ export default function App() {
                   </div>
                 )}
 
-                <div className="rsec">
+                {paid && <div className="rsec">
                   <div className="rsec-head">
                     <div className="rsec-ico" style={{ background: 'rgba(155,28,28,0.1)', border: '1px solid rgba(155,28,28,0.25)' }}>🔴</div>
                     <div>
@@ -974,9 +997,9 @@ export default function App() {
                     </div>
                   </div>
                   <div className="cview" dangerouslySetInnerHTML={{ __html: highlight(contractText.slice(0, 3000), result.clauses) }} />
-                </div>
+                </div>}
 
-                {result.legalComparison?.length > 0 && (
+                {paid && result.legalComparison?.length > 0 && (
                   <div className="rsec">
                     <div className="rsec-head">
                       <div className="rsec-ico" style={{ background: 'rgba(45,106,79,0.1)', border: '1px solid rgba(45,106,79,0.25)' }}>🌍</div>
@@ -996,7 +1019,7 @@ export default function App() {
                   </div>
                 )}
 
-                <div className="rsec">
+                {paid && <div className="rsec">
                   <div className="rsec-head">
                     <div className="rsec-ico" style={{ background: 'rgba(139,105,20,0.1)', border: '1px solid rgba(139,105,20,0.25)' }}>✍️</div>
                     <div>
@@ -1009,9 +1032,9 @@ export default function App() {
                       <li key={i} className="sug-item"><span className="snum">{i + 1}</span>{s}</li>
                     ))}
                   </ul>
-                </div>
+                </div>}
 
-                {result.overallAdvice && (
+                {paid && result.overallAdvice && (
                   <div className="rsec" style={{ background: 'rgba(139,105,20,0.05)', borderColor: 'rgba(139,105,20,0.2)' }}>
                     <div className="rsec-head">
                       <div className="rsec-ico" style={{ background: 'rgba(139,105,20,0.12)', border: '1px solid rgba(139,105,20,0.3)' }}>🎯</div>
@@ -1021,7 +1044,7 @@ export default function App() {
                   </div>
                 )}
 
-                <div className="rsec">
+                {paid && <div className="rsec">
                   <div className="rsec-head">
                     <div className="rsec-ico" style={{ background: 'rgba(139,92,246,0.1)', border: '1px solid rgba(139,92,246,0.25)' }}>💬</div>
                     <div>
@@ -1061,14 +1084,14 @@ export default function App() {
                       {chatLoading ? <span className="spin" /> : 'Ask →'}
                     </button>
                   </div>
-                </div>
+                </div>}
               </div>
             )}
           </div>
         )}
 
         <footer>
-          <span>© 2026 ContractGuard</span>
+          <span>© 2026 MyLegalGuard</span>
           <span>For informational purposes only · Not legal advice</span>
         </footer>
       </div>
